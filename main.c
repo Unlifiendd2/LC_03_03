@@ -43,6 +43,19 @@ void ajoutFinRecur(Maillon **pointeurSurListe, int n, const char *nom)
 }
 
 
+void ajoutTete(Maillon ** pointeurSurListe, int n, const char * s) {
+    if(*pointeurSurListe == NULL) {
+        *pointeurSurListe = initMaillon(n, s);
+    } else {
+        Maillon * tmp = *pointeurSurListe;
+        *pointeurSurListe = malloc(sizeof(Maillon));
+        (*pointeurSurListe)->n = n;
+        strcpy((*pointeurSurListe)->nom, s);
+        (*pointeurSurListe)->next = tmp;
+    }
+}
+
+
 // liberation de la liste avec while
 void libererListe(Maillon **pointeurSurListe)
 {
@@ -57,6 +70,50 @@ void libererListe(Maillon **pointeurSurListe)
     }
 
     *pointeurSurListe = NULL;
+}
+
+void liberationRecu(Maillon ** Pliste) {
+    if (*Pliste == NULL)
+        return;
+    liberationRecu(&((*Pliste)->next));
+    free(*Pliste);
+    *Pliste = NULL;
+}
+
+void retirerDebut(Maillon ** Pliste) {
+    if (*Pliste == NULL)
+        printf("Impossible de retirer au debut : liste vide.");
+    else {
+        Maillon * tmp = (*Pliste)->next;
+        free(*Pliste);
+        *Pliste = tmp;
+    }
+}
+
+void retirerFin(Maillon ** Pliste) {
+    if (*Pliste == NULL)
+        printf("Impossible de retirer à la fin : liste vide.");
+    else {
+        Maillon * head = *Pliste;
+        Maillon * tmp = *Pliste;
+        while(tmp->next != NULL) {
+            *Pliste = tmp;
+            tmp = tmp->next;
+        }
+        free(tmp);
+        (*Pliste)->next = NULL;
+        *Pliste = head;
+    }
+}
+
+void rechercher(Maillon * liste, int n) {
+    while (liste->n != n && liste->next != NULL) {
+        liste = liste->next;
+    }
+    if (liste->n == n)
+        printf("Nom du maillon %d : %s.", n, liste->nom);
+    else
+        printf("Le maillon n'existe pas.");
 }
 
 void afficherListeAvecWhile(Maillon *liste)
@@ -119,19 +176,49 @@ int main()
     // Ajout (recursive) en fin de liste (TAIL)
     ajoutFinRecur(&liste, 1, "A");
     ajoutFinRecur(&liste, 2, "B");
-
-    // Test des methodes d'affichage
-    printf("\n\n********* Affiche while *********\n\n");
     afficherListeAvecWhile(liste);
 
-    printf("\n\n********* Affiche recur *********\n\n");
-    printf("HEAD \n");
-    afficherListeRecur(liste);
+
+    // Ajout en début de liste (HEAD)
+    printf("\n\n********* Ajout au debut *********\n\n");
+    ajoutTete(&liste, 3, "C");
+    afficherListeAvecWhile(liste);
+
+
+    // Ajout en fin de liste (TAIL)
+    printf("\n\n********* Ajout a la fin *********\n\n");
+    ajoutTete(&liste, 3456, "D");
+    ajoutTete(&liste, 8293, "E");
+    ajoutTete(&liste, 719, "F");
+    ajoutTete(&liste, 70, "G");
+    ajoutTete(&liste, 1023, "H");
+    ajoutTete(&liste, 7, "I");
+    afficherListeAvecWhile(liste);
+
+
+    // Retrait au debut (HEAD)
+    printf("\n\n********* Retrait au debut *************\n\n");
+    retirerDebut(&liste);
+    afficherListeAvecWhile(liste);
+
+
+    // Retrait a la fin (TAIL)
+    printf("\n\n********* Retrait a la fin *************\n\n");
+    retirerFin(&liste);
+    afficherListeAvecWhile(liste);
+
+
+    // Recherche par n
+    printf("\n\n*********** Recgerche par n ***************\n\n");
+    int n;
+    scanf("%d", &n);
+    rechercher(liste, n);
 
 
     // Liberation
     printf("\n\n********* Free ******************\n\n");
-    libererListe(&liste);
+    liberationRecu(&liste);
     afficherListeAvecWhile(liste);
 
+    return 0;
 }
